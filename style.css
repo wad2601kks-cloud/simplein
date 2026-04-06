@@ -1,0 +1,9 @@
+/* ngatur font default */
+body { 
+    font-family: 'inter', sans-serif; 
+}
+
+/* class penting buat nyembunyiin halaman secara dinamis */
+.hidden-view { 
+    display: none !important; 
+}
