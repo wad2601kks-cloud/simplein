@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc, serverTimestamp, query, where, onSnapshot, orderBy, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, addDoc, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const firebaseConfig = {
@@ -13,209 +13,127 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
 const safeCreateIcons = () => { if (typeof lucide !== 'undefined') lucide.createIcons(); };
-safeCreateIcons();
 
 let itemTerpilih = null;
 let map = null;
 let marker = null;
 
-// ================= NAVIGASI =================
 window.showview = (viewid) => {
-    ['home-view', 'loading-view', 'results-view'].forEach(v => {
-        const el = document.getElementById(v);
-        if(el) el.classList.add('hidden-view');
-    });
-    const target = document.getElementById(viewid);
-    if(target) target.classList.remove('hidden-view');
+    ['home-view', 'loading-view', 'results-view'].forEach(v => document.getElementById(v)?.classList.add('hidden-view'));
+    document.getElementById(viewid)?.classList.remove('hidden-view');
 };
 
-// ================= CARI BARANG =================
 window.handleaisearch = async function() {
-    const queryStr = document.getElementById('ai-input').value;
-    if(!queryStr) return;
+    const q = document.getElementById('ai-input').value; if(!q) return;
     window.showview('loading-view');
     try {
-        const querySnapshot = await getDocs(collection(db, "product"));
-        const products = [];
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            if (data.name.toLowerCase().includes(queryStr.toLowerCase())) {
-                products.push({ id: doc.id, ...data });
-            }
-        });
-        renderproducts(products);
-        document.getElementById('ai-response-text').innerText = `ai nemu ${products.length} produk buat lu bos.`;
+        const snap = await getDocs(collection(db, "product"));
+        const prods = [];
+        snap.forEach(d => { if(d.data().name.toLowerCase().includes(q.toLowerCase())) prods.push({id: d.id, ...d.data()}); });
+        renderproducts(prods);
+        document.getElementById('ai-response-text').innerText = `ai nemu ${prods.length} barang nih bos. sikat!`;
         window.showview('results-view');
-    } catch (e) { 
-        window.showview('home-view');
-        alert("error bos pas cari barang!");
-    }
+    } catch (e) { window.showview('home-view'); }
 };
 
-function renderproducts(products) {
-    const container = document.getElementById('product-container');
-    container.innerHTML = ''; 
-    products.forEach(p => {
-        // Encode data produk buat dikirim ke fungsi beli
-        const dataStr = encodeURIComponent(JSON.stringify(p));
-        
+function renderproducts(prods) {
+    const container = document.getElementById('product-container'); container.innerHTML = '';
+    prods.forEach(p => {
+        const dataJson = encodeURIComponent(JSON.stringify(p));
         container.innerHTML += `
-            <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-100 flex flex-col text-left">
+            <div class="bg-white rounded-[2rem] p-4 shadow-sm border border-slate-100 flex flex-col text-left">
                 <img src="${p.media_url}" class="w-full h-44 object-cover rounded-2xl mb-4 shadow-sm">
-                <h4 class="font-bold text-slate-800 text-sm mb-1 truncate">${p.name}</h4>
-                <div class="text-[10px] text-slate-400 mb-3 italic">Toko: ${p.storename || 'Simplein'}</div>
-                
-                <div class="grid grid-cols-2 gap-2 mb-4 bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                    <div>
-                        <div class="text-[8px] text-slate-400 uppercase font-bold mb-1">berat</div>
-                        <div class="text-[10px] font-bold text-slate-700">${p.berat || '-'}</div>
-                    </div>
-                    <div>
-                        <div class="text-[8px] text-slate-400 uppercase font-bold mb-1">dimensi</div>
-                        <div class="text-[10px] font-bold text-slate-700">${p.volume || '-'}</div>
-                    </div>
+                <h4 class="font-bold text-sm truncate text-slate-800">${p.name}</h4>
+                <div class="grid grid-cols-2 gap-2 my-3 bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                    <div><p class="text-[8px] uppercase font-bold text-slate-400 mb-1">berat</p><p class="text-[10px] font-black text-slate-700">${p.berat || '-'}</p></div>
+                    <div><p class="text-[8px] uppercase font-bold text-slate-400 mb-1">dimensi</p><p class="text-[10px] font-black text-slate-700">${p.volume || '-'}</p></div>
                 </div>
-
                 <div class="mt-auto">
                     <p class="text-orange-500 font-black text-xl mb-3">Rp ${Number(p.price).toLocaleString()}</p>
-                    <button onclick="window.opencheckout('${dataStr}')" class="w-full bg-[#111827] text-white py-3.5 rounded-2xl text-xs font-bold transition hover:bg-black">beli sekarang</button>
+                    <button onclick="window.opencheckout('${dataJson}')" class="w-full bg-[#111827] text-white py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-black transition">beli sekarang</button>
                 </div>
             </div>`;
     });
     safeCreateIcons();
 }
 
-// ================= CHECKOUT =================
-window.opencheckout = (dataJson) => {
-    const p = JSON.parse(decodeURIComponent(dataJson));
-    itemTerpilih = p;
-    
+window.opencheckout = (data) => {
+    const p = JSON.parse(decodeURIComponent(data)); itemTerpilih = p;
     document.getElementById('modal-title').innerText = p.name;
     document.getElementById('modal-price').innerText = "Rp " + Number(p.price).toLocaleString();
     document.getElementById('modal-img-placeholder').innerHTML = `<img src="${p.media_url}" class="w-full h-full object-cover">`;
-    document.getElementById('seller-bank-name').innerText = p.bank || "DANA / QRIS";
+    document.getElementById('seller-bank-name').innerText = p.bank || "DANA/QRIS";
     document.getElementById('seller-rekening').innerText = p.rekening || "08123456789";
-    
-    const qrImg = document.getElementById('seller-qr');
-    qrImg.src = p.qr_url || `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${p.rekening}`;
-    
+    document.getElementById('seller-qr').src = p.qr_url || `https://api.qrserver.com/v1/create-qr-code/?data=${p.rekening}`;
     document.getElementById('checkout-modal').classList.remove('hidden-view');
-    
-    // Reset & Init Map
     setTimeout(() => {
-        if (!map) {
-            map = L.map('map', { attributionControl: false }).setView([-6.2000, 106.8166], 13);
+        if(!map) {
+            map = L.map('map', { attributionControl: false }).setView([-6.2, 106.8], 13);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-            L.Control.geocoder({ defaultMarkGeocode: false, placeholder: "cari alamat lu..." }).on('markgeocode', function(e) {
-                map.setView(e.geocode.center, 18);
-                if (marker) map.removeLayer(marker);
-                marker = L.marker(e.geocode.center, {draggable: true}).addTo(map);
-                document.getElementById('buyer-lat').value = e.geocode.center.lat;
-                document.getElementById('buyer-lng').value = e.geocode.center.lng;
-                document.getElementById('location-status').innerText = "lokasi terpilih: " + e.geocode.name;
-            }).addTo(map);
-            
             map.on('click', (e) => {
-                if (marker) map.removeLayer(marker);
-                marker = L.marker(e.latlng, {draggable: true}).addTo(map);
+                if(marker) map.removeLayer(marker);
+                marker = L.marker(e.latlng).addTo(map);
                 document.getElementById('buyer-lat').value = e.latlng.lat;
                 document.getElementById('buyer-lng').value = e.latlng.lng;
-                document.getElementById('location-status').innerText = "lokasi diset manual";
+                document.getElementById('location-status').innerText = "lokasi diset manual bos!";
             });
-        } else {
-            map.invalidateSize();
-        }
+        } else { map.invalidateSize(); }
     }, 400);
 };
 
 window.closecheckout = () => document.getElementById('checkout-modal').classList.add('hidden-view');
 
-window.processpayment = async function() {
-    const nama = document.getElementById('buyer-name').value;
-    const detail = document.getElementById('buyer-address-detail').value;
-    const lat = document.getElementById('buyer-lat').value;
+window.processpayment = async () => {
+    const name = document.getElementById('buyer-name').value;
     const file = document.getElementById('pembayaran-image').files[0];
-    
-    if(!nama || !lat || !file) return alert("lengkapi data dan bukti transfer bos!");
-
+    if(!name || !file) return alert("data & bukti tf jangan lupa bos!");
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = async (e) => {
         try {
             const docRef = await addDoc(collection(db, "transactions"), {
-                item: itemTerpilih.name, price: Number(itemTerpilih.price), sellerid: itemTerpilih.sellerid,
-                customer: nama, address: detail, lat: Number(lat),
-                lng: Number(document.getElementById('buyer-lng').value),
+                item: itemTerpilih.name, price: Number(itemTerpilih.price), customer: name,
                 bukti_transfer: e.target.result, status: "menunggu konfirmasi", time: serverTimestamp()
             });
             localStorage.setItem('lastOrderId', docRef.id);
-            alert("Sip bos! Pesanan dikirim. ID: " + docRef.id);
+            alert("pesanan dibuat! id: " + docRef.id);
             window.closecheckout();
-            window.showview('home-view');
-        } catch (err) { alert("gagal kirim data bos!"); }
+        } catch (err) { alert("gagal kirim!"); }
     };
 };
 
-// ================= AI ASISTEN =================
-window.toggleAI = () => { document.getElementById('ai-chat-modal').classList.toggle('hidden-view'); };
+window.toggleAI = () => document.getElementById('ai-chat-modal').classList.toggle('hidden-view');
 
 window.askAI = async () => {
     const input = document.getElementById('ai-query');
+    const qStr = input.value; if(!qStr) return;
     const chatBox = document.getElementById('ai-chat-box');
-    const typingIndicator = document.getElementById('ai-typing');
-    const queryStr = input.value.trim();
-    const API_KEY = "AIzaSyD34-ERbUBfrCQo1SPP7Aia67KEcVJkMvM"; 
-
-    if (!queryStr) return;
-    chatBox.innerHTML += `<div class="self-end bg-purple-600 text-white p-3 rounded-l-2xl rounded-tr-2xl max-w-[85%] shadow-sm mb-2 text-left">${queryStr}</div>`;
-    input.value = ''; chatBox.scrollTop = chatBox.scrollHeight;
-    typingIndicator.classList.remove('hidden');
+    const typing = document.getElementById('ai-typing');
+    chatBox.innerHTML += `<div class="self-end bg-purple-600 text-white p-3 rounded-2xl mb-2 shadow-sm">${qStr}</div>`;
+    input.value = ''; typing.classList.remove('hidden'); chatBox.scrollTop = chatBox.scrollHeight;
 
     try {
         const prodSnap = await getDocs(collection(db, "product"));
-        let daftarProduk = "";
-        prodSnap.forEach(d => { const p = d.data(); daftarProduk += `- ${p.name} (Harga: Rp${p.price})\n`; });
+        let daftar = ""; prodSnap.forEach(d => { daftar += `- ${d.data().name} (Rp${d.data().price})\n`; });
+        const lastId = localStorage.getItem('lastOrderId');
+        let order = "User belum belanja.";
+        if(lastId) { const d = await getDoc(doc(db, "transactions", lastId)); if(d.exists()) order = `User terakhir beli ${d.data().item}, status: ${d.data().status}`; }
 
-        const lastOrderId = localStorage.getItem('lastOrderId');
-        let infoTransaksi = "User belum pernah belanja.";
-        if (lastOrderId) {
-            const transDoc = await getDoc(doc(db, "transactions", lastOrderId));
-            if (transDoc.exists()) {
-                const t = transDoc.data();
-                infoTransaksi = `User terakhir beli ${t.item} seharga Rp${t.price} dengan status: ${t.status}.`;
-            }
-        }
-
-        const genAI = new GoogleGenerativeAI(API_KEY);
+        const genAI = new GoogleGenerativeAI("AIzaSyD34-ERbUBfrCQo1SPP7Aia67KEcVJkMvM");
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-        const promptKonteks = `Lu asisten AI Simplein. Jawab gaul lu-gue, panggil bos.
-        KONTEKS TOKO KITA:
-        ${daftarProduk}
-        RIWAYAT USER:
-        ${infoTransaksi}
-        Bantu bos ini: ${queryStr}`;
-
-        const result = await model.generateContent(promptKonteks);
-        const text = result.response.text();
-
-        typingIndicator.classList.add('hidden');
-        chatBox.innerHTML += `<div class="self-start bg-white border border-purple-100 p-3 rounded-r-2xl rounded-tl-2xl max-w-[85%] shadow-sm text-slate-700 mb-2 text-left">${text}</div>`;
+        const result = await model.generateContent(`Lu asisten Simplein. Jawab gaul lu-gue, panggil bos. Produk kita: ${daftar}. Riwayat user: ${order}. Tanya: ${qStr}`);
+        
+        typing.classList.add('hidden');
+        chatBox.innerHTML += `<div class="self-start bg-white p-3 rounded-2xl mb-2 border shadow-sm text-slate-700 leading-relaxed">${result.response.text()}</div>`;
         chatBox.scrollTop = chatBox.scrollHeight;
-    } catch (e) {
-        typingIndicator.classList.add('hidden');
-        chatBox.innerHTML += `<div class="self-start bg-red-50 text-red-500 p-2 rounded-lg text-[10px]">waduh bos, jaringan amsyat. coba lagi!</div>`;
-    }
-    safeCreateIcons();
+    } catch (e) { typing.classList.add('hidden'); }
 };
 
 window.promptLacak = async () => {
-    const id = prompt("masukin ID pesanan:");
-    if(!id) return;
-    try {
-        const d = await getDoc(doc(db, "transactions", id));
-        if(d.exists()) { alert("status: " + d.data().status.toUpperCase()); } else { alert("ID gak nemu bos!"); }
-    } catch(e) { alert("gagal melacak!"); }
+    const id = prompt("masukin ID pesanan:"); if(!id) return;
+    const d = await getDoc(doc(db, "transactions", id));
+    alert(d.exists() ? "status: " + d.data().status.toUpperCase() : "ID gak ketemu bos!");
 };
+
+window.addEventListener('load', () => { safeCreateIcons(); });
