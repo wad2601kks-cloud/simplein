@@ -25,7 +25,7 @@
     </script>
     <style>
         .hidden-view { display: none !important; }
-        #map { height: 200px; width: 100%; border-radius: 12px; margin-top: 8px; z-index: 1; border: 1px solid #e2e8f0; }
+        #map { height: 200px; width: 100%; border-radius: 12px; margin-top: 8px; border: 1px solid #e2e8f0; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col text-left">
@@ -42,7 +42,7 @@
             <h1 class="text-4xl md:text-5xl font-bold text-slate-900 leading-tight">cari barang apapun, <br><span class="text-primary">biar ai yang kerja.</span></h1>
             <div class="relative mt-8 shadow-xl rounded-full overflow-hidden">
                 <input type="text" id="ai-input" class="block w-full pl-6 pr-32 py-5 border-none text-lg outline-none" placeholder="misal: headphone sony...">
-                <button onclick="window.handleaisearch()" class="absolute inset-y-2 right-2 bg-primary text-white px-6 rounded-full font-medium transition">cari</button>
+                <button onclick="window.handleaisearch()" class="absolute inset-y-2 right-2 bg-primary text-white px-6 rounded-full font-medium">cari</button>
             </div>
         </div>
 
@@ -53,72 +53,29 @@
 
         <div id="results-view" class="hidden-view w-full py-8 space-y-6 text-left">
             <button onclick="window.showview('home-view')" class="text-sm font-medium text-slate-500 flex items-center gap-1 mb-4"><i data-lucide="arrow-left" class="w-4 h-4"></i> kembali</button>
-            <div class="bg-blue-50 border border-blue-100 p-6 rounded-2xl flex gap-4 items-start">
-                <div class="bg-primary text-white p-2 rounded-full"><i data-lucide="bot" class="w-5 h-5"></i></div>
-                <div><h3 class="font-semibold text-primary">hasil pencarian ai</h3><p class="text-slate-700" id="ai-response-text"></p></div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="product-container"></div>
+            <div id="product-container" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
         </div>
     </main>
 
-    <div id="checkout-modal" class="hidden-view fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="p-6 border-b flex justify-between items-center"><h2 class="text-xl font-bold">checkout kilat</h2><button onclick="window.closecheckout()"><i data-lucide="x" class="w-6 h-6"></i></button></div>
-            <div class="p-6 overflow-y-auto space-y-4">
-                <div class="flex gap-4 items-center p-4 bg-slate-50 rounded-xl"><div id="checkout-media-placeholder" class="w-16 h-16 rounded-lg overflow-hidden"></div><div><h4 class="font-semibold" id="modal-title"></h4><p class="text-accent font-bold" id="modal-price"></p></div></div>
-                <form class="space-y-4" onsubmit="event.preventDefault(); window.processpayment();">
-                    <input type="text" id="buyer-name" placeholder="nama penerima" required class="w-full border rounded-xl px-4 py-2.5 outline-none">
-                    <div id="map"></div><p id="location-status" class="text-[10px] text-blue-600 italic">pilih lokasi...</p>
-                    <input type="hidden" id="buyer-lat"><input type="hidden" id="buyer-lng">
-                    <textarea id="buyer-address-detail" required class="w-full border rounded-xl px-4 py-2.5 outline-none" placeholder="patokan alamat..."></textarea>
-                    <div class="p-4 bg-yellow-50 rounded-2xl flex items-center gap-4 text-left">
-                        <img id="seller-qr" src="" class="w-20 h-20 bg-white p-1 rounded-lg border"><div class="text-xs"><b>BANK:</b> <span id="seller-bank-name"></span><br><b>REK:</b> <span id="seller-rekening"></span></div>
-                    </div>
-                    <div class="p-4 border-2 border-dashed rounded-2xl bg-slate-50 text-center"><input type="file" id="pembayaran-image" accept="image/*" required class="text-[10px] w-full"></div>
-                    <button type="submit" id="btn-bayar" class="w-full bg-accent text-white font-bold py-4 rounded-2xl shadow-lg">bayar sekarang</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div id="chat-modal-buyer" class="hidden fixed bottom-6 right-6 z-[100] w-80 h-[450px] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden text-left">
-        <div class="p-4 bg-accent text-white flex justify-between items-center shadow-md">
-            <div class="flex items-center gap-2"><div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div><span class="font-bold text-sm">chat seller</span></div>
-            <button onclick="window.closeChatBuyer()" class="font-bold text-lg">✕</button>
-        </div>
-        <div id="chat-box-buyer" class="flex-grow p-4 overflow-y-auto space-y-3 bg-slate-50 flex flex-col"></div>
-        <form onsubmit="event.preventDefault(); window.sendChatBuyer();" class="p-3 bg-white border-t flex items-center gap-2">
-            <label class="cursor-pointer text-slate-400 hover:text-accent">
-                <i data-lucide="image" class="w-5 h-5"></i>
-                <input type="file" id="chat-media-buyer" accept="image/*,video/*" class="hidden">
-            </label>
-            <input type="text" id="chat-input-buyer" placeholder="tanya..." class="flex-grow border rounded-xl px-4 py-2 text-sm outline-none bg-slate-50 focus:bg-white">
-            <button type="submit" id="btn-send-chat" class="bg-accent text-white p-2 rounded-xl"><i data-lucide="send" class="w-4 h-4"></i></button>
-        </form>
-    </div>
-
     <div class="fixed bottom-24 right-6 z-50">
-        <button onclick="window.toggleAI()" class="bg-gradient-to-tr from-purple-600 to-blue-500 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition duration-300">
+        <button onclick="window.toggleAI()" class="bg-gradient-to-tr from-purple-600 to-blue-500 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition">
             <i data-lucide="bot" class="w-6 h-6"></i>
         </button>
     </div>
 
     <div id="ai-chat-modal" class="hidden-view fixed bottom-32 right-6 z-[100] w-80 h-[450px] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden text-left">
         <div class="p-4 bg-gradient-to-r from-purple-600 to-blue-500 text-white flex justify-between items-center shadow-md">
-            <div class="flex items-center gap-2">
-                <div class="w-2 h-2 bg-purple-300 rounded-full animate-ping"></div>
-                <span class="font-bold text-sm">simplein ai</span>
-            </div>
+            <div class="flex items-center gap-2"><span class="font-bold text-sm">simplein ai</span></div>
             <button onclick="window.toggleAI()" class="font-bold text-lg">✕</button>
         </div>
         <div id="ai-chat-box" class="flex-grow p-4 overflow-y-auto space-y-3 bg-slate-50 flex flex-col text-[11px]">
             <div class="bg-white border p-3 rounded-2xl self-start max-w-[80%] shadow-sm text-slate-600">
-                halo! gua ai simplein. mau tanya apa aja boleh, gaskeun.
+                halo! gua ai simplein. tanya stok, saran, atau paket lu di sini bos.
             </div>
         </div>
         <div id="ai-typing" class="hidden px-4 py-2 text-[10px] text-slate-400 italic">ai lagi mikir...</div>
         <form onsubmit="event.preventDefault(); window.askAI();" class="p-3 bg-white border-t flex gap-2">
-            <input type="text" id="ai-query" placeholder="tanya apa aja..." class="flex-grow border rounded-xl px-4 py-2 text-sm outline-none bg-slate-50 focus:bg-white">
+            <input type="text" id="ai-query" placeholder="tanya apa aja..." class="flex-grow border rounded-xl px-4 py-2 text-sm outline-none bg-slate-50">
             <button type="submit" class="bg-purple-600 text-white p-2 rounded-xl"><i data-lucide="sparkles" class="w-4 h-4"></i></button>
         </form>
     </div>
