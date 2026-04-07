@@ -20,11 +20,13 @@ let map = null;
 let marker = null;
 let currentChatOrderId = null;
 
+// --- VIEW NAVIGATION ---
 window.showview = (viewid) => {
     ['home-view', 'loading-view', 'results-view'].forEach(v => document.getElementById(v)?.classList.add('hidden-view'));
     document.getElementById(viewid)?.classList.remove('hidden-view');
 };
 
+// --- AI SEARCH ---
 window.handleaisearch = async function() {
     const q = document.getElementById('ai-input').value; if(!q) return;
     window.showview('loading-view');
@@ -57,6 +59,7 @@ function renderproducts(prods) {
     safeCreateIcons();
 }
 
+// --- CHECKOUT & MAPS ---
 window.opencheckout = (data) => {
     const p = JSON.parse(decodeURIComponent(data)); itemTerpilih = p;
     document.getElementById('modal-title').innerText = p.name;
@@ -109,16 +112,26 @@ window.processpayment = async () => {
                 sellerid: itemTerpilih.sellerid || 'none', lat: lat, lng: lng, address_detail: patokan,
                 bukti_transfer: e.target.result, status: "menunggu konfirmasi", time: serverTimestamp()
             });
-            localStorage.setItem('lastOrderId', docRef.id);
+
+            // --- SIMPEN KE HISTORY LOCAL STORAGE ---
+            const history = JSON.parse(localStorage.getItem('simplein_history') || '[]');
+            history.push({
+                id: docRef.id,
+                item: itemTerpilih.name,
+                store: itemTerpilih.storename || 'simplein store',
+                date: new Date().toISOString()
+            });
+            localStorage.setItem('simplein_history', JSON.stringify(history));
+
             alert("pesanan berhasil! id: " + docRef.id);
             window.closecheckout();
-            // INI FITUR AUTO-OPEN CHATNYA BOS
             window.openChatBuyer(docRef.id, itemTerpilih.storename || 'seller');
         } catch (err) { alert("gagal kirim bos!"); }
         finally { btn.disabled = false; btn.innerText = "bayar sekarang"; }
     };
 };
 
+// --- CHAT SYSTEM ---
 window.openChatBuyer = (orderId, storeName) => {
     currentChatOrderId = orderId;
     document.getElementById('chat-buyer-title').innerText = "chat ke " + storeName;
@@ -153,6 +166,39 @@ window.sendChatBuyer = async () => {
 
 window.closeChatBuyer = () => document.getElementById('chat-modal-buyer').classList.add('hidden-view');
 
+// --- HISTORY LOGIC ---
+window.toggleHistory = () => {
+    const panel = document.getElementById('history-panel');
+    panel.classList.toggle('hidden-view');
+    if (!panel.classList.contains('hidden-view')) renderHistory();
+};
+
+function renderHistory() {
+    const container = document.getElementById('history-list');
+    const localData = JSON.parse(localStorage.getItem('simplein_history') || '[]');
+    container.innerHTML = '';
+    if (localData.length === 0) {
+        container.innerHTML = '<div class="text-center py-10 text-slate-300 text-[10px] font-bold italic uppercase tracking-widest">belum ada history bos...</div>';
+        return;
+    }
+    localData.slice().reverse().forEach(h => {
+        container.innerHTML += `
+            <div onclick="window.openChatBuyer('${h.id}', '${h.store}')" class="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:border-primary cursor-pointer transition group">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-[9px] font-black text-blue-500 uppercase tracking-tighter">ID: ${h.id}</span>
+                    <span class="text-[8px] text-slate-300 font-bold">${new Date(h.date).toLocaleDateString()}</span>
+                </div>
+                <h4 class="font-bold text-[11px] text-slate-800 truncate">${h.item}</h4>
+                <p class="text-[10px] text-slate-400 mt-1 italic">toko: ${h.store}</p>
+                <div class="mt-3 flex justify-end">
+                    <span class="text-[9px] font-black text-slate-300 group-hover:text-primary transition uppercase tracking-widest flex items-center gap-1">lanjut chat <i data-lucide="chevron-right" class="w-3 h-3"></i></span>
+                </div>
+            </div>`;
+    });
+    safeCreateIcons();
+}
+
+// --- OTHER FEATURES ---
 window.promptLacak = async () => {
     const id = prompt("masukin ID pesanan lu bos:"); if(!id) return;
     const d = await getDoc(doc(db, "transactions", id));
