@@ -6,311 +6,221 @@
     <title>seller dashboard - simplein</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@0.363.0"></script>
-    <link href="https://fonts.googleapis.com/css2?family=inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script>tailwind.config = { theme: { extend: { colors: { primary: '#1e40af', accent: '#f97316' }, fontFamily: { sans: ['inter', 'sans-serif'] } } } }</script>
+    <link href="https://fonts.googleapis.com/css2?family=inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script>tailwind.config = { theme: { extend: { colors: { primary: '#1e40af' } } } }</script>
     <style>
-        body { font-family: 'inter', sans-serif; } 
+        body { font-family: 'inter', sans-serif; }
         .hidden-view { display: none !important; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 h-screen flex overflow-hidden text-left relative">
-
-    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col z-10">
-        <div class="p-6 border-b">
-            <div class="font-bold text-2xl text-primary">seller.</div>
-            <div class="mt-6 p-4 bg-slate-50 rounded-xl text-xs">
-                <div id="active-user-email" class="font-bold text-slate-700 truncate mb-3 italic">memuat...</div>
-                <button id="btn-logout" class="w-full bg-red-50 text-red-600 font-semibold py-2 rounded-lg hover:bg-red-100 transition">keluar</button>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex">
+    <aside class="w-72 bg-white border-r flex flex-col sticky top-0 h-screen">
+        <div class="p-8 font-black text-3xl text-primary tracking-tighter">seller.</div>
+        <div class="px-6 mb-4">
+            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <p id="seller-mail" class="text-[10px] font-black text-slate-400 truncate mb-2 uppercase tracking-widest">memuat...</p>
+                <button id="btn-logout" class="w-full bg-red-50 text-red-500 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-red-100 transition">keluar</button>
             </div>
         </div>
-        <nav class="p-4 space-y-2">
-            <button onclick="window.switchtab('dashboard')" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-blue-50 rounded-xl font-medium transition"><i data-lucide="layout-dashboard"></i> ringkasan</button>
-            <button onclick="window.switchtab('products')" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-blue-50 rounded-xl font-medium transition"><i data-lucide="package"></i> tambah produk</button>
+        <nav class="p-6 space-y-3 font-black text-[10px] uppercase tracking-widest">
+            <button onclick="window.switchtab('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-4 px-5 py-4 bg-blue-50 text-primary rounded-[1.5rem] transition">
+                <i data-lucide="shopping-bag" class="w-5 h-5"></i> pesanan
+            </button>
+            <button onclick="window.switchtab('requests')" id="nav-requests" class="w-full flex items-center gap-4 px-5 py-4 hover:bg-slate-50 rounded-[1.5rem] transition text-slate-400">
+                <i data-lucide="megaphone" class="w-5 h-5"></i> permintaan buyer
+            </button>
         </nav>
     </aside>
 
-    <main class="flex-grow flex flex-col h-full overflow-y-auto p-8 z-10">
-        <div id="dashboard-view" class="space-y-6">
-            <div class="grid grid-cols-2 gap-6 mb-8">
-                <div class="bg-white p-6 rounded-2xl border shadow-sm"><div class="text-slate-500 text-[10px] uppercase font-bold">pendapatan</div><div class="text-3xl font-black" id="daily-revenue">rp 0</div></div>
-                <div class="bg-white p-6 rounded-2xl border shadow-sm"><div class="text-slate-500 text-[10px] uppercase font-bold">pesanan</div><div class="text-3xl font-black text-primary" id="daily-orders">0</div></div>
-            </div>
-            <h3 class="text-lg font-bold mb-4">antrean pesanan realtime</h3>
-            <div id="live-orders-container" class="space-y-4 text-left"></div>
+    <main class="flex-grow p-12 overflow-y-auto">
+        <div id="dashboard-view" class="space-y-8">
+            <h2 class="text-3xl font-black tracking-tight">Antrean Pesanan</h2>
+            <div id="live-orders-container" class="grid gap-4"></div>
         </div>
-
-        <div id="products-view" class="hidden-view space-y-6 text-left">
-            <h2 class="text-2xl font-bold">tambah produk baru</h2>
-            <form id="form-tambah-produk" class="bg-white p-8 rounded-3xl border shadow-sm max-w-2xl space-y-5">
-                <input type="text" id="p-name" placeholder="nama produk" required class="w-full border rounded-xl px-4 py-2 outline-none">
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="p-price" placeholder="harga (rp)" required class="border rounded-xl px-4 py-2">
-                    <input type="text" id="p-storename" placeholder="nama toko" required class="border rounded-xl px-4 py-2">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="text" id="p-berat" placeholder="berat (ex: 250g)" class="border rounded-xl px-4 py-2">
-                    <input type="text" id="p-volume" placeholder="dimensi (ex: 10x10cm)" class="border rounded-xl px-4 py-2">
-                </div>
-                <div class="p-4 bg-blue-50 rounded-2xl space-y-2">
-                    <label class="block text-[10px] font-black text-blue-600 uppercase">1. foto produk</label>
-                    <input type="file" id="p-media" accept="image/*" required class="w-full text-xs cursor-pointer">
-                </div>
-                <div class="p-4 bg-orange-50 rounded-2xl space-y-2 border border-orange-100">
-                    <label class="block text-[10px] font-black text-orange-600 uppercase">2. upload foto qr pembayaran asli</label>
-                    <input type="file" id="p-qr" accept="image/*" required class="w-full text-xs cursor-pointer">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="text" id="p-bank" placeholder="bca / dana / qris" required class="border rounded-xl px-4 py-2">
-                    <input type="text" id="p-rekening" placeholder="no rekening" required class="border rounded-xl px-4 py-2">
-                </div>
-                <button type="submit" id="btn-simpan-produk" class="w-full bg-primary text-white py-3 rounded-2xl font-bold hover:bg-blue-800 transition">simpan produk</button>
-            </form>
+        <div id="requests-view" class="hidden-view space-y-8">
+            <h2 class="text-3xl font-black tracking-tight">Live Broadcast Buyer</h2>
+            <div id="live-requests-container" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
         </div>
     </main>
 
-    <div id="chat-modal-seller" class="hidden-view fixed bottom-6 right-6 z-[100] w-80 h-[450px] bg-white rounded-3xl shadow-2xl border flex flex-col overflow-hidden text-left">
-        <div class="p-4 bg-primary text-white flex justify-between items-center"><span class="font-bold text-sm" id="chat-target-name">chat</span><button onclick="document.getElementById('chat-modal-seller').classList.add('hidden-view')" class="font-bold text-lg hover:text-red-300 transition">✕</button></div>
-        <div id="chat-box-seller" class="flex-grow p-4 overflow-y-auto space-y-3 bg-slate-50 flex flex-col text-[11px]"></div>
-        <form onsubmit="event.preventDefault(); window.sendChatSeller();" class="p-3 bg-white border-t flex items-center gap-2">
-            <label class="cursor-pointer text-slate-400 hover:text-primary transition">
-                <i data-lucide="image" class="w-5 h-5"></i>
-                <input type="file" id="chat-media-seller" accept="image/*" class="hidden">
-            </label>
-            <input type="text" id="chat-input-seller" placeholder="balas bos..." class="flex-grow border rounded-xl px-4 py-2 text-xs outline-none bg-slate-50 focus:border-primary">
-            <button type="submit" class="bg-primary text-white p-2 rounded-xl hover:bg-blue-800 transition"><i data-lucide="send" class="w-4 h-4"></i></button>
-        </form>
-    </div>
-
-    <div id="login-view" class="fixed inset-0 bg-[#0f172a] bg-opacity-95 z-[999999] flex items-center justify-center">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center relative pointer-events-auto">
-            <h2 id="auth-title" class="text-3xl font-bold text-primary mb-4 tracking-tight">login seller.</h2>
-            <form id="login-form" class="space-y-4" onsubmit="event.preventDefault(); window.handleAuth();">
-                <input type="email" id="email-input" placeholder="email toko" required class="w-full border-2 border-slate-200 rounded-xl px-4 py-3 outline-none text-sm focus:border-primary">
-                <input type="password" id="password-input" placeholder="password (min 6 karakter)" required class="w-full border-2 border-slate-200 rounded-xl px-4 py-3 outline-none text-sm focus:border-primary">
-                <button type="submit" id="btn-auth" class="w-full bg-primary text-white py-3.5 rounded-xl font-bold hover:bg-blue-800 tracking-widest text-xs uppercase cursor-pointer">masuk</button>
+    <div id="offer-modal" class="hidden-view fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[110] flex items-center justify-center p-6 text-left">
+        <div class="bg-white rounded-[3rem] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-8 border-b flex justify-between items-center bg-white sticky top-0"><h2 class="text-2xl font-black italic tracking-tighter">kasih tawaran harga.</h2><button onclick="window.closeOfferModal()" class="text-slate-300">✕</button></div>
+            <form id="form-tawaran" class="p-8 overflow-y-auto custom-scrollbar space-y-5">
+                <input type="hidden" id="target-request-id">
+                <input type="text" id="o-name" placeholder="nama produk" required class="w-full bg-slate-50 border-0 rounded-2xl px-6 py-4 outline-none font-bold text-sm">
+                <div class="grid grid-cols-2 gap-4"><input type="number" id="o-price" placeholder="harga (rp)" required class="w-full bg-slate-50 border-0 rounded-2xl px-6 py-4 outline-none font-bold text-sm"><input type="text" id="o-store" placeholder="nama toko" required class="w-full bg-slate-50 border-0 rounded-2xl px-6 py-4 outline-none font-bold text-sm"></div>
+                <div class="grid grid-cols-2 gap-4"><input type="text" id="o-berat" placeholder="berat (ex: 250g)" class="w-full bg-slate-50 border-0 rounded-2xl px-6 py-4 outline-none font-bold text-sm"><input type="text" id="o-volume" placeholder="dimensi (ex: 10x10cm)" class="w-full bg-slate-50 border-0 rounded-2xl px-6 py-4 outline-none font-bold text-sm"></div>
+                <div class="p-5 bg-blue-50 rounded-3xl space-y-2 border border-blue-100"><label class="block text-[10px] font-black text-blue-600 uppercase tracking-widest">1. Foto Produk Penawaran</label><input type="file" id="o-media" accept="image/*" required class="w-full text-xs font-bold text-slate-500 cursor-pointer"></div>
+                <div class="p-5 bg-orange-50 rounded-3xl space-y-2 border border-orange-100"><label class="block text-[10px] font-black text-orange-600 uppercase tracking-widest">2. Foto QR Pembayaran Toko</label><input type="file" id="o-qr" accept="image/*" required class="w-full text-xs font-bold text-slate-500 cursor-pointer"></div>
+                <div class="grid grid-cols-2 gap-4"><input type="text" id="o-bank" placeholder="bca / dana / qris" required class="w-full bg-slate-50 border-0 rounded-2xl px-6 py-4 outline-none font-bold text-sm"><input type="text" id="o-rek" placeholder="no rekening / hp" required class="w-full bg-slate-50 border-0 rounded-2xl px-6 py-4 outline-none font-bold text-sm"></div>
+                <button type="submit" id="btn-kirim-tawaran" class="w-full bg-primary text-white py-5 rounded-[2rem] font-black uppercase text-xs tracking-widest shadow-xl">kirim penawaran</button>
             </form>
-            <div class="mt-6 flex flex-col gap-3 text-center">
-                <button type="button" onclick="window.toggleAuthMode()" id="toggle-auth-btn" class="text-xs text-primary font-bold hover:underline cursor-pointer">belum punya toko? daftar di sini</button>
-                <a href="index.html" class="text-[10px] text-slate-400 font-bold uppercase hover:text-primary mt-2 cursor-pointer">kembali ke web utama</a>
-            </div>
         </div>
     </div>
 
+    <div id="chat-modal-seller" class="hidden-view fixed bottom-6 right-6 z-[120] w-80 h-[450px] bg-white rounded-[2.5rem] shadow-2xl border flex flex-col overflow-hidden text-left">
+        <div class="p-4 bg-primary text-white flex justify-between items-center"><span class="font-black italic text-sm text-left" id="chat-seller-title">chat</span><button onclick="window.closeChatSeller()">✕</button></div>
+        <div id="chat-box-seller" class="flex-grow p-4 overflow-y-auto space-y-3 bg-slate-50 flex flex-col text-[11px] custom-scrollbar"></div>
+        <form onsubmit="event.preventDefault(); window.sendChatSeller();" class="p-3 bg-white border-t flex items-center gap-2">
+            <label class="cursor-pointer text-slate-400 hover:text-primary"><i data-lucide="image" class="w-5 h-5"></i><input type="file" id="chat-img-seller" accept="image/*" class="hidden"></label>
+            <input type="text" id="chat-input-seller" placeholder="balas..." class="flex-grow bg-slate-100 rounded-xl px-4 py-2 text-xs outline-none"><button type="submit" class="bg-primary text-white p-2 rounded-xl">kirim</button>
+        </form>
+    </div>
+
+    <div id="login-view" class="fixed inset-0 bg-[#111827] z-[200] flex items-center justify-center p-6 text-center"><div class="bg-white p-10 rounded-[3.5rem] w-full max-w-sm shadow-2xl"><h2 class="text-3xl font-black mb-6">login seller.</h2><form onsubmit="event.preventDefault(); window.handleAuth();" class="space-y-4"><input type="email" id="email-input" placeholder="EMAIL" required class="w-full bg-slate-50 rounded-2xl px-6 py-4 outline-none font-bold text-xs"><input type="password" id="password-input" placeholder="PASSWORD" required class="w-full bg-slate-50 rounded-2xl px-6 py-4 outline-none font-bold text-xs"><button type="submit" class="w-full bg-primary text-white py-5 rounded-2xl font-black uppercase text-[10px]">Masuk</button></form></div></div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-        import { getFirestore, collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+        import { getFirestore, collection, query, where, onSnapshot, addDoc, updateDoc, getDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
-        // MASUKIN API KEY LU DI SINI BOS
-       const firebaseConfig = {
-            apiKey: "AIzaSyAdPxvp6zhIEjNPdQJq-4F7eU0bwTaGrMs",
-            authDomain: "simplein-55eeb.firebaseapp.com",
-            projectId: "simplein-55eeb",
-            storageBucket: "simplein-55eeb.firebasestorage.app",
-            messagingSenderId: "513993838187",
-            appId: "1:513993838187:web:281d8a37bc75fab7572b2e",
-            measurementId: "G-FWX89Z1PRG"
-        };
-
+        const firebaseConfig = { apiKey: "AIzaSyAdPxvp6zhIEjNPdQJq-4F7eU0bwTaGrMs", authDomain: "simplein-55eeb.firebaseapp.com", projectId: "simplein-55eeb", storageBucket: "simplein-55eeb.firebasestorage.app", messagingSenderId: "513993838187", appId: "1:513993838187:web:281d8a37bc75fab7572b2e" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        let currentChatId = null;
 
-        // Biar loginnya gak nempel selamanya kalo tab diclose
-        setPersistence(auth, browserSessionPersistence);
-
-        let currentChatOrderId = null;
-        let unsubscribeChatSeller = null;
-        let isLoginMode = true;
-
-        const formatrupiah = (angka) => new Intl.NumberFormat('id-id', { style: 'currency', currency: 'idr', maximumFractionDigits: 0 }).format(angka);
-
-        window.switchtab = (tabName) => {
-            document.getElementById('dashboard-view').classList.add('hidden-view');
-            document.getElementById('products-view').classList.add('hidden-view');
-            document.getElementById(tabName + '-view').classList.remove('hidden-view');
+        window.switchtab = (tab) => {
+            ['dashboard', 'requests'].forEach(t => { document.getElementById(t + '-view').classList.add('hidden-view'); document.getElementById('nav-' + t).classList.remove('bg-blue-50', 'text-primary'); document.getElementById('nav-' + t).classList.add('text-slate-400'); });
+            document.getElementById(tab + '-view').classList.remove('hidden-view'); document.getElementById('nav-' + tab).classList.add('bg-blue-50', 'text-primary'); document.getElementById('nav-' + tab).classList.remove('text-slate-400');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         };
 
-        window.lihatBukti = (base64) => {
-            const win = window.open();
-            win.document.write(`<body style="margin:0;display:flex;justify-content:center;background:#1e293b"><img src="${base64}" style="max-height:100vh"><\/body>`);
-        };
+        onAuthStateChanged(auth, (user) => { if (user) { document.getElementById('login-view').classList.add('hidden-view'); document.getElementById('seller-mail').innerText = user.email; mulaiPantau(user.email); } else { document.getElementById('login-view').classList.remove('hidden-view'); } });
+        window.handleAuth = () => signInWithEmailAndPassword(auth, document.getElementById('email-input').value, document.getElementById('password-input').value);
+        document.getElementById('btn-logout').onclick = () => signOut(auth);
 
-        window.accPembayaran = async (id) => {
-            if(confirm("konfirmasi pembayaran ini bos?")) {
-                try { await updateDoc(doc(db, "transactions", id), { status: "diproses" }); alert("pembayaran di-acc!"); } catch (e) { alert("gagal acc!"); }
-            }
-        };
-window.openChatSeller = (orderId, customerName) => {
-            currentChatOrderId = orderId;
-            document.getElementById('chat-target-name').innerText = "chat: " + customerName;
-            document.getElementById('chat-modal-seller').classList.remove('hidden-view');
-            if(unsubscribeChatSeller) unsubscribeChatSeller();
-            
-            const q = query(collection(db, "chats"), where("orderid", "==", orderId));
-            unsubscribeChatSeller = onSnapshot(q, (snapshot) => {
-                const chatBox = document.getElementById('chat-box-seller'); chatBox.innerHTML = '';
-                const msgs = []; snapshot.forEach(doc => msgs.push(doc.data()));
-                msgs.sort((a,b) => (a.time?.seconds || 0) - (b.time?.seconds || 0));
+        function mulaiPantau(email) {
+            onSnapshot(query(collection(db, "transactions"), where("sellerId", "==", email)), (snap) => {
+                const cont = document.getElementById('live-orders-container'); cont.innerHTML = '';
+                snap.forEach(d => {
+                    const t = d.data(); const id = d.id;
+                    cont.innerHTML += `
+                        <div class="p-6 bg-white border border-slate-100 rounded-[2rem] flex flex-col gap-4 text-left">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-primary"><i data-lucide="package"></i></div>
+                                    <div><h4 class="font-black text-sm text-slate-800">${t.item}</h4><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${t.customer}</p></div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-orange-500 font-black text-lg leading-none">Rp ${Number(t.price).toLocaleString()}</p>
+                                    <span class="text-[8px] font-black uppercase ${t.status === 'berhasil' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'} px-2 py-0.5 rounded">${t.status}</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-2 pt-4 border-t">
+                                <button onclick="window.lihatBukti('${t.bukti}')" class="flex-grow bg-slate-100 text-slate-600 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-tighter">Bukti TF</button>
+                                <button onclick="window.openChatSeller('${id}', '${t.customer}')" class="p-2.5 bg-blue-50 text-blue-600 rounded-xl"><i data-lucide="message-square"></i></button>
+                                
+                                <select onchange="window.updateStatusChat('${id}', '${t.customer}', this.value)" class="bg-slate-900 text-white px-3 py-2.5 rounded-xl text-[10px] font-black uppercase outline-none cursor-pointer">
+                                    <option value="" disabled selected>STATUS</option>
+                                    <option value="OTW">DIANTAR</option>
+                                    <option value="DITERIMA">DITERIMA</option>
+                                </select>
 
-                msgs.forEach(c => {
-                    const isMe = c.sender === 'seller';
-                    // buat nampilin gambar kalo ada
-                    const media = c.media_url ? `<img src="${c.media_url}" class="max-w-full rounded-lg mb-1 shadow-sm cursor-pointer" onclick="window.open('${c.media_url}')">` : '';
-                    
-                    chatBox.innerHTML += `
-                        <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-1">
-                            <div class="${isMe ? 'bg-primary text-white rounded-l-2xl rounded-tr-2xl' : 'bg-white border text-slate-700 rounded-r-2xl rounded-tl-2xl'} p-2 text-[10px] shadow-sm max-w-[80%] break-words">
-                                ${media}${c.message || ''}</div>
+                                ${t.status !== 'berhasil' ? `<button onclick="window.accPembayaran('${id}')" class="flex-grow bg-primary text-white py-2.5 rounded-xl text-[10px] font-black uppercase">ACC</button>` : `<button disabled class="flex-grow bg-green-500 text-white py-2.5 rounded-xl text-[10px] font-black opacity-50 italic">Selesai</button>`}
+                            </div>
                         </div>`;
                 });
-                chatBox.scrollTop = chatBox.scrollHeight;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
             });
-        };
 
-        window.sendChatSeller = async () => {
-            const input = document.getElementById('chat-input-seller'); 
-            const fileInput = document.getElementById('chat-media-seller');
-            
-            // validasi: teks kosong DAN file kosong = gak usah kirim
-            if(!input.value && (!fileInput || fileInput.files.length === 0)) return;
-
-            const saveMsg = async (mediaBase64 = null) => {
-                await addDoc(collection(db, "chats"), { 
-                    orderid: currentChatOrderId, 
-                    sender: 'seller', 
-                    message: input.value, 
-                    media_url: mediaBase64, // nyimpen gambar base64
-                    time: serverTimestamp() 
+            onSnapshot(query(collection(db, "requests"), where("status", "==", "open")), (snap) => {
+                const cont = document.getElementById('live-requests-container'); cont.innerHTML = '';
+                snap.forEach(d => {
+                    const r = d.data(); const reqId = d.id; const cardId = 'card-' + reqId;
+                    cont.innerHTML += `<div id="${cardId}" class="p-8 bg-white border-2 border-slate-50 rounded-[2.5rem] shadow-sm transition group text-left"><h4 class="text-xl font-black text-slate-800 mb-6 italic leading-tight text-left">"${r.query}"</h4><div id="btn-container-${reqId}"><button onclick="window.openOfferModal('${reqId}')" class="w-full bg-primary text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:bg-black transition">Kasih Harga</button></div></div>`;
+                    onSnapshot(query(collection(db, "offers"), where("requestId", "==", reqId), where("sellerId", "==", email)), (checkSnap) => {
+                        const btnCont = document.getElementById('btn-container-' + reqId); const card = document.getElementById(cardId);
+                        if (!checkSnap.empty && btnCont && card) { card.classList.add('bg-slate-50', 'border-orange-200', 'opacity-80'); btnCont.innerHTML = `<button disabled class="w-full bg-orange-400 text-white py-4 rounded-2xl text-[10px] font-black uppercase cursor-not-allowed">Sudah Ditawar</button>`; }
+                    });
                 });
-                // reset input
-                input.value = ''; 
-                if(fileInput) fileInput.value = '';
-            };
-
-            // kalo ada file gambar
-            if (fileInput && fileInput.files.length > 0) {
-                const reader = new FileReader();
-                reader.readAsDataURL(fileInput.files[0]);
-                reader.onload = (e) => saveMsg(e.target.result); // kirim base64
-            } else { 
-                saveMsg(); // kirim teks doang
-            }
-        };
-
-        window.toggleAuthMode = () => {
-            isLoginMode = !isLoginMode;
-            document.getElementById('auth-title').innerText = isLoginMode ? "login seller." : "buka toko baru.";
-            document.getElementById('btn-auth').innerText = isLoginMode ? "masuk" : "daftar sekarang";
-            document.getElementById('toggle-auth-btn').innerText = isLoginMode ? "belum punya toko? daftar di sini" : "udah punya toko? masuk bos";
-        };
-
-        window.handleAuth = async () => {
-            const e = document.getElementById('email-input').value;
-            const p = document.getElementById('password-input').value;
-            const btn = document.getElementById('btn-auth');
-            
-            btn.disabled = true; btn.innerText = "tunggu...";
-            
-            try {
-                if(isLoginMode) {
-                    await signInWithEmailAndPassword(auth, e, p);
-                } else {
-                    await createUserWithEmailAndPassword(auth, e, p);
-                    alert("toko berhasil dibuat bos!");
-                }
-            } catch(err) {
-                alert("gagal bos: " + err.message);
-                btn.disabled = false; btn.innerText = isLoginMode ? "masuk" : "daftar sekarang";
-            }
-        };
-
-        document.getElementById('btn-logout').addEventListener('click', async () => {
-            await signOut(auth);
-            location.reload();
-        });
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('login-view').classList.add('hidden-view');
-                document.getElementById('active-user-email').innerText = user.email;
-                mulaiPantauPesanan(user.email);
-            } else { document.getElementById('login-view').classList.remove('hidden-view'); }
-        });
-
-        function mulaiPantauPesanan(email) {
-            const q = query(collection(db, "transactions"), where("sellerid", "==", email));
-            onSnapshot(q, (snapshot) => {
-                const container = document.getElementById('live-orders-container'); container.innerHTML = ''; let rev = 0; let count = 0;
-                const docs = []; snapshot.forEach(d => docs.push({id: d.id, ...d.data()}));
-                docs.sort((a, b) => (b.time?.seconds || 0) - (a.time?.seconds || 0));
-
-                if (docs.length === 0) container.innerHTML = '<div class="text-sm text-slate-400 italic">belum ada pesanan bos...</div>';
-
-                docs.forEach((data) => {
-                    if(data.status === 'diproses') rev += Number(data.price); count++;
-                    const mapLink = (data.lat && data.lng) ? `<a href="https://www.google.com/maps/search/?api=1&query=$$${data.lat},${data.lng}" target="_blank" class="bg-blue-600 hover:bg-blue-700 transition text-white p-2.5 rounded-xl flex items-center"><i data-lucide="map-pin" class="w-4 h-4"></i></a>` : '';
-                    
-                    container.innerHTML += `
-                    <div class="p-6 bg-white border rounded-3xl shadow-sm mb-4">
-                        <div class="flex justify-between items-start">
-                            <div class="flex gap-4 items-center">
-                                <div class="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center">
-                                    <i data-lucide="package" class="w-6 h-6"></i>
-                                </div>
-                                <div>
-                                    <h5 class="font-bold text-slate-800">${data.item}</h5>
-                                    <p class="text-[11px] text-slate-500">pembeli: <b>${data.customer}</b></p>
-                                    <p class="text-[10px] text-blue-600 bg-blue-50 px-2 py-1 rounded mt-1 inline-block">patokan: ${data.address_detail || '-'}</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-lg font-black text-primary">${formatrupiah(data.price)}</p>
-                                <span class="text-[9px] px-2 py-0.5 rounded-full font-bold ${data.status === 'menunggu konfirmasi' ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}">${data.status.toUpperCase()}</span>
-                            </div>
-                        </div>
-                        <div class="flex gap-2 mt-4 pt-4 border-t">
-                            <button onclick="window.lihatBukti('${data.bukti_transfer}')" class="flex-grow bg-slate-100 text-slate-600 py-2.5 rounded-xl text-[10px] font-bold hover:bg-slate-200 transition">bukti tf</button>
-                            <button onclick="window.openChatSeller('${data.id}', '${data.customer}')" class="p-2.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition"><i data-lucide="message-square" class="w-4 h-4"></i></button>
-                            ${data.status === 'menunggu konfirmasi' ? `<button onclick="window.accPembayaran('${data.id}')" class="flex-grow bg-green-500 text-white py-2.5 rounded-xl text-[10px] font-bold shadow-lg shadow-green-100 hover:bg-green-600 transition">acc bayar</button>` : ''}
-                            ${mapLink}
-                        </div>
-                    </div>`;
-                });
-                document.getElementById('daily-revenue').innerText = formatrupiah(rev);
-                document.getElementById('daily-orders').innerText = count;
                 if (typeof lucide !== 'undefined') lucide.createIcons();
             });
         }
 
-        document.getElementById('form-tambah-produk').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btn-simpan-produk');
-            
-            const toBase64 = (file) => new Promise((res) => {
-                const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(file);
-            });
-
-            btn.disabled = true; btn.innerText = "mengunggah...";
-
+        // --- FUNGSI UPDATE STATUS KE CHAT ---
+        window.updateStatusChat = async (orderId, customerName, status) => {
             try {
-                const mediaBase64 = await toBase64(document.getElementById('p-media').files[0]);
-                const qrBase64 = await toBase64(document.getElementById('p-qr').files[0]);
+                // Tarik data penawaran terakhir buat ambil foto barang
+                const transSnap = await getDoc(doc(db, "transactions", orderId));
+                if (!transSnap.exists()) return alert("Gagal narik data transaksi!");
+                
+                const dataTrans = transSnap.data();
+                const fotoBarang = dataTrans.media_url || ""; // Foto produk awal
+                
+                let pesan = "";
+                if (status === "OTW") pesan = `Halo ${customerName}, barang lu lagi diantar kurir ya!`;
+                else if (status === "DITERIMA") pesan = `Barang lu katanya udah sampai di lokasi nih. Cek ya!`;
 
-                await addDoc(collection(db, "product"), {
-                    name: document.getElementById('p-name').value, price: Number(document.getElementById('p-price').value),
-                    storename: document.getElementById('p-storename').value, berat: document.getElementById('p-berat').value || '-',
-                    volume: document.getElementById('p-volume').value || '-', bank: document.getElementById('p-bank').value,
-                    rekening: document.getElementById('p-rekening').value, media_url: mediaBase64, qr_url: qrBase64, 
-                    sellerid: auth.currentUser.email, time: serverTimestamp()
+                await addDoc(collection(db, "chats"), {
+                    orderId: orderId,
+                    sender: 'seller',
+                    message: pesan,
+                    img: fotoBarang, // Kirim foto barang bareng status
+                    time: serverTimestamp()
                 });
+                alert("Status & Foto berhasil dikirim ke buyer!");
+            } catch (e) { alert("Gagal update status!"); }
+        };
 
-                alert("produk berhasil ditambah bos!"); e.target.reset(); window.switchtab('dashboard');
-            } catch (err) { alert("gagal nambah produk bos!"); }
-            finally { btn.disabled = false; btn.innerText = "simpan produk"; }
+        window.lihatBukti = (b) => { const img = new Image(); img.src = b; const w = window.open(""); w.document.write(img.outerHTML); };
+        window.accPembayaran = async (id) => { if(confirm("ACC?")) { await updateDoc(doc(db, "transactions", id), { status: "berhasil" }); } };
+        window.openOfferModal = (id) => { document.getElementById('target-request-id').value = id; document.getElementById('offer-modal').classList.remove('hidden-view'); };
+        window.closeOfferModal = () => document.getElementById('offer-modal').classList.add('hidden-view');
+
+        document.getElementById('form-tawaran').onsubmit = async (e) => {
+            e.preventDefault(); const btn = document.getElementById('btn-kirim-tawaran'); btn.innerText = "...";
+            const toB64 = (f) => new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); });
+            try {
+                const img = await toB64(document.getElementById('o-media').files[0]); const qr = await toB64(document.getElementById('o-qr').files[0]);
+                await addDoc(collection(db, "offers"), { requestId: document.getElementById('target-request-id').value, sellerId: auth.currentUser.email, storeName: document.getElementById('o-store').value, productName: document.getElementById('o-name').value, price: Number(document.getElementById('o-price').value), berat: document.getElementById('o-berat').value || "-", volume: document.getElementById('o-volume').value || "-", media_url: img, qr_url: qr, bank: document.getElementById('o-bank').value, rekening: document.getElementById('o-rek').value, createdAt: serverTimestamp() });
+                window.closeOfferModal(); btn.innerText = "KIRIM PENAWARAN";
+            } catch (err) { alert("Gagal!"); }
+        };
+
+       // Ganti fungsi openChatSeller di seller.html lu pake yang ini
+window.openChatSeller = (orderId, customerName) => {
+    currentChatId = orderId;
+    document.getElementById('chat-seller-title').innerText = "chat: " + customerName;
+    document.getElementById('chat-modal-seller').classList.remove('hidden-view');
+    
+    // Cek status transaksi buat ngunci chat
+    onSnapshot(doc(db, "transactions", orderId), (docSnap) => {
+        const isSelesai = docSnap.data()?.status === 'selesai';
+        const chatForm = document.querySelector('#chat-modal-seller form');
+        if (isSelesai) {
+            chatForm.innerHTML = `<div class="w-full text-center p-2 text-[10px] font-black uppercase text-slate-400 bg-slate-100 italic">Transaksi Selesai</div>`;
+        }
+    });
+
+    onSnapshot(query(collection(db, "chats"), where("orderId", "==", orderId)), (snap) => {
+        const box = document.getElementById('chat-box-seller'); 
+        box.innerHTML = '';
+        const msgs = []; snap.forEach(d => msgs.push(d.data()));
+        msgs.sort((a,b) => (a.time?.seconds || 0) - (b.time?.seconds || 0));
+        msgs.forEach(m => {
+            const isMe = m.sender === 'seller';
+            const align = isMe ? 'items-end' : 'items-start';
+            const bg = isMe ? 'bg-primary text-white rounded-l-xl rounded-tr-xl' : 'bg-white border rounded-r-xl rounded-tl-xl';
+            const foto = m.img ? `<img src="${m.img}" class="w-full rounded-lg mb-1 cursor-pointer" onclick="window.open('${m.img}')">` : '';
+            box.innerHTML += `<div class="flex flex-col ${align} mb-1"><div class="${bg} p-2 max-w-[80%] shadow-sm">${foto}${m.message || ''}</div></div>`;
         });
-        
-        window.addEventListener('load', () => { if (typeof lucide !== 'undefined') lucide.createIcons(); });
+        box.scrollTop = box.scrollHeight;
+    });
+};
+
+        window.sendChatSeller = async () => {
+            const input = document.getElementById('chat-input-seller'), fileInput = document.getElementById('chat-img-seller');
+            if(!input.value && !fileInput.files[0]) return;
+            let img = null; if(fileInput.files[0]) { const toB64 = (f) => new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); }); img = await toB64(fileInput.files[0]); }
+            await addDoc(collection(db, "chats"), { orderId: currentChatId, sender: 'seller', message: input.value, img: img, time: serverTimestamp() });
+            input.value = ''; fileInput.value = '';
+        };
+        window.closeChatSeller = () => document.getElementById('chat-modal-seller').classList.add('hidden-view');
+        window.onload = () => { if (typeof lucide !== 'undefined') lucide.createIcons(); };
     </script>
 </body>
 </html>
