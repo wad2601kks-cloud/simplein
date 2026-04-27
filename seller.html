@@ -10,7 +10,7 @@
     <script>tailwind.config = { theme: { extend: { colors: { primary: '#1e40af' } } } }</script>
     <style>
         body { font-family: 'inter', sans-serif; }
-        .hidden-view { display: none !important; }
+        .hidden-view { display: none !important; pointer-events: none !important; opacity: 0 !important; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
     </style>
@@ -24,17 +24,13 @@
                 <button id="btn-logout" class="w-full bg-red-50 text-red-500 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-red-100 transition">keluar</button>
             </div>
         </div>
-        <nav class="p-6 space-y-3 font-black text-[10px] uppercase tracking-widest">
-            <button onclick="window.switchtab('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-4 px-5 py-4 bg-blue-50 text-primary rounded-[1.5rem] transition">
-                <i data-lucide="shopping-bag" class="w-5 h-5"></i> pesanan
-            </button>
-            <button onclick="window.switchtab('requests')" id="nav-requests" class="w-full flex items-center gap-4 px-5 py-4 hover:bg-slate-50 rounded-[1.5rem] transition text-slate-400">
-                <i data-lucide="megaphone" class="w-5 h-5"></i> permintaan buyer
-            </button>
+        <nav class="p-6 space-y-3 font-black text-[10px] uppercase tracking-widest text-left">
+            <button onclick="window.switchtab('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-4 px-5 py-4 bg-blue-50 text-primary rounded-[1.5rem] transition"><i data-lucide="shopping-bag" class="w-5 h-5"></i> pesanan</button>
+            <button onclick="window.switchtab('requests')" id="nav-requests" class="w-full flex items-center gap-4 px-5 py-4 hover:bg-slate-50 rounded-[1.5rem] transition text-slate-400"><i data-lucide="megaphone" class="w-5 h-5"></i> permintaan buyer</button>
         </nav>
     </aside>
 
-    <main class="flex-grow p-12 overflow-y-auto">
+    <main class="flex-grow p-12 overflow-y-auto text-left">
         <div id="dashboard-view" class="space-y-8">
             <h2 class="text-3xl font-black tracking-tight">Antrean Pesanan</h2>
             <div id="live-orders-container" class="grid gap-4"></div>
@@ -47,7 +43,7 @@
 
     <div id="offer-modal" class="hidden-view fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[110] flex items-center justify-center p-6 text-left">
         <div class="bg-white rounded-[3rem] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="p-8 border-b flex justify-between items-center bg-white sticky top-0"><h2 class="text-2xl font-black italic tracking-tighter">kasih tawaran harga.</h2><button onclick="window.closeOfferModal()" class="text-slate-300">✕</button></div>
+            <div class="p-8 border-b flex justify-between items-center bg-white sticky top-0"><h2 class="text-2xl font-black italic tracking-tighter">kasih tawaran harga.</h2><button onclick="window.closeOfferModal()" class="text-slate-300 hover:text-red-500 transition">✕</button></div>
             <form id="form-tawaran" class="p-8 overflow-y-auto custom-scrollbar space-y-5">
                 <input type="hidden" id="target-request-id">
                 <input type="text" id="o-name" placeholder="nama produk" required class="w-full bg-slate-50 border-0 rounded-2xl px-6 py-4 outline-none font-bold text-sm">
@@ -56,7 +52,7 @@
                 <div class="p-5 bg-blue-50 rounded-3xl space-y-2 border border-blue-100"><label class="block text-[10px] font-black text-blue-600 uppercase tracking-widest">1. Foto Produk Penawaran</label><input type="file" id="o-media" accept="image/*" required class="w-full text-xs font-bold text-slate-500 cursor-pointer"></div>
                 <div class="p-5 bg-orange-50 rounded-3xl space-y-2 border border-orange-100"><label class="block text-[10px] font-black text-orange-600 uppercase tracking-widest">2. Foto QR Pembayaran Toko</label><input type="file" id="o-qr" accept="image/*" required class="w-full text-xs font-bold text-slate-500 cursor-pointer"></div>
                 <div class="grid grid-cols-2 gap-4"><input type="text" id="o-bank" placeholder="bca / dana / qris" required class="w-full bg-slate-50 border-0 rounded-2xl px-6 py-4 outline-none font-bold text-sm"><input type="text" id="o-rek" placeholder="no rekening / hp" required class="w-full bg-slate-50 border-0 rounded-2xl px-6 py-4 outline-none font-bold text-sm"></div>
-                <button type="submit" id="btn-kirim-tawaran" class="w-full bg-primary text-white py-5 rounded-[2rem] font-black uppercase text-xs tracking-widest shadow-xl">kirim penawaran</button>
+                <button type="submit" id="btn-kirim-tawaran" class="w-full bg-primary text-white py-5 rounded-[2rem] font-black uppercase text-xs tracking-widest shadow-xl transition hover:bg-black">kirim penawaran</button>
             </form>
         </div>
     </div>
@@ -66,22 +62,44 @@
         <div id="chat-box-seller" class="flex-grow p-4 overflow-y-auto space-y-3 bg-slate-50 flex flex-col text-[11px] custom-scrollbar"></div>
         <form onsubmit="event.preventDefault(); window.sendChatSeller();" class="p-3 bg-white border-t flex items-center gap-2">
             <label class="cursor-pointer text-slate-400 hover:text-primary"><i data-lucide="image" class="w-5 h-5"></i><input type="file" id="chat-img-seller" accept="image/*" class="hidden"></label>
-            <input type="text" id="chat-input-seller" placeholder="balas..." class="flex-grow bg-slate-100 rounded-xl px-4 py-2 text-xs outline-none"><button type="submit" class="bg-primary text-white p-2 rounded-xl">kirim</button>
+            <input type="text" id="chat-input-seller" placeholder="balas..." class="flex-grow bg-slate-100 rounded-xl px-4 py-2 text-xs outline-none"><button type="submit" class="bg-primary text-white p-2 rounded-xl hover:bg-black transition"><i data-lucide="send" class="w-4 h-4"></i></button>
         </form>
     </div>
 
-    <div id="login-view" class="fixed inset-0 bg-[#111827] z-[200] flex items-center justify-center p-6 text-center"><div class="bg-white p-10 rounded-[3.5rem] w-full max-w-sm shadow-2xl"><h2 class="text-3xl font-black mb-6">login seller.</h2><form onsubmit="event.preventDefault(); window.handleAuth();" class="space-y-4"><input type="email" id="email-input" placeholder="EMAIL" required class="w-full bg-slate-50 rounded-2xl px-6 py-4 outline-none font-bold text-xs"><input type="password" id="password-input" placeholder="PASSWORD" required class="w-full bg-slate-50 rounded-2xl px-6 py-4 outline-none font-bold text-xs"><button type="submit" class="w-full bg-primary text-white py-5 rounded-2xl font-black uppercase text-[10px]">Masuk</button></form></div></div>
+    <div id="login-view" class="fixed inset-0 bg-[#111827] z-[200] flex items-center justify-center p-6 text-center">
+        
+        <div id="auth-choice-box" class="bg-white p-10 rounded-[3.5rem] w-full max-w-sm shadow-2xl transition-all">
+            <h2 class="text-3xl font-black mb-8 tracking-tighter text-primary">simplein<span class="text-slate-800">seller.</span></h2>
+            <div class="space-y-4">
+                <button onclick="window.showAuthForm('login')" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg hover:bg-primary transition">Masuk Akun</button>
+                <button onclick="window.showAuthForm('register')" class="w-full bg-slate-100 text-slate-600 py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-slate-200 transition">Daftar Akun Baru</button>
+            </div>
+            <button onclick="window.location.href='index.html'" class="mt-8 text-[10px] font-bold text-slate-400 hover:text-slate-600 uppercase tracking-widest transition">&larr; kembali ke pembeli</button>
+        </div>
+
+        <div id="auth-form-box" class="hidden-view bg-white p-10 rounded-[3.5rem] w-full max-w-sm shadow-2xl relative transition-all">
+            <button onclick="window.backToChoice()" class="absolute top-8 left-8 text-slate-400 hover:text-primary transition"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
+            <h2 id="auth-title" class="text-3xl font-black mb-6 mt-2">login.</h2>
+            <form id="auth-form" class="space-y-4">
+                <input type="email" id="email-input" placeholder="EMAIL LU" required class="w-full bg-slate-50 rounded-2xl px-6 py-4 outline-none font-bold text-xs border border-slate-100 focus:border-primary transition">
+                <input type="password" id="password-input" placeholder="PASSWORD LU (Min. 6 Karakter)" required class="w-full bg-slate-50 rounded-2xl px-6 py-4 outline-none font-bold text-xs border border-slate-100 focus:border-primary transition">
+                <button type="submit" id="auth-btn" class="w-full bg-primary text-white py-5 rounded-2xl font-black uppercase text-[10px] transition hover:bg-black shadow-lg mt-2">Masuk</button>
+            </form>
+        </div>
+
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
         import { getFirestore, collection, query, where, onSnapshot, addDoc, updateDoc, getDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
         const firebaseConfig = { apiKey: "AIzaSyAdPxvp6zhIEjNPdQJq-4F7eU0bwTaGrMs", authDomain: "simplein-55eeb.firebaseapp.com", projectId: "simplein-55eeb", storageBucket: "simplein-55eeb.firebasestorage.app", messagingSenderId: "513993838187", appId: "1:513993838187:web:281d8a37bc75fab7572b2e" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
         let currentChatId = null;
+        let isLoginMode = true; 
 
         window.switchtab = (tab) => {
             ['dashboard', 'requests'].forEach(t => { document.getElementById(t + '-view').classList.add('hidden-view'); document.getElementById('nav-' + t).classList.remove('bg-blue-50', 'text-primary'); document.getElementById('nav-' + t).classList.add('text-slate-400'); });
@@ -89,17 +107,100 @@
             if (typeof lucide !== 'undefined') lucide.createIcons();
         };
 
-        onAuthStateChanged(auth, (user) => { if (user) { document.getElementById('login-view').classList.add('hidden-view'); document.getElementById('seller-mail').innerText = user.email; mulaiPantau(user.email); } else { document.getElementById('login-view').classList.remove('hidden-view'); } });
-        window.handleAuth = () => signInWithEmailAndPassword(auth, document.getElementById('email-input').value, document.getElementById('password-input').value);
+        // --- LOGIKA AUTHENTICATION UI & SUBMIT FIX ---
+        window.showAuthForm = (mode) => {
+            isLoginMode = (mode === 'login');
+            document.getElementById('auth-choice-box').classList.add('hidden-view');
+            document.getElementById('auth-form-box').classList.remove('hidden-view');
+            document.getElementById('auth-title').innerText = isLoginMode ? "masuk." : "daftar.";
+            document.getElementById('auth-btn').innerText = isLoginMode ? "Masuk Sekarang" : "Daftar Sekarang";
+            
+            // Reset state kalau pindah form
+            document.getElementById('auth-form').reset();
+            const btn = document.getElementById('auth-btn');
+            btn.disabled = false;
+            btn.classList.remove('bg-green-500');
+            btn.classList.add('bg-primary');
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        };
+
+        window.backToChoice = () => {
+            document.getElementById('auth-form-box').classList.add('hidden-view');
+            document.getElementById('auth-choice-box').classList.remove('hidden-view');
+            document.getElementById('auth-form').reset();
+            
+            // Reset Tombol
+            const btn = document.getElementById('auth-btn');
+            btn.disabled = false;
+            btn.classList.remove('bg-green-500');
+            btn.classList.add('bg-primary');
+        };
+
+        document.getElementById('auth-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email-input').value;
+            const password = document.getElementById('password-input').value;
+            const btn = document.getElementById('auth-btn');
+            const oriText = isLoginMode ? "Masuk Sekarang" : "Daftar Sekarang";
+
+            btn.innerText = "PROSES..."; btn.disabled = true;
+
+            try {
+                if (isLoginMode) {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    btn.innerText = "BERHASIL MASUK ✔️";
+                    btn.classList.replace('bg-primary', 'bg-green-500');
+                } else {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                    btn.innerText = "AKUN JADI! ✔️";
+                    btn.classList.replace('bg-primary', 'bg-green-500');
+                }
+                
+                // Jeda dikit biar visual suksesnya keliatan
+                setTimeout(() => {
+                    document.getElementById('auth-form').reset();
+                    btn.innerText = oriText; 
+                    btn.disabled = false;
+                    btn.classList.replace('bg-green-500', 'bg-primary');
+                }, 1500);
+
+            } catch (err) {
+                // PESAN ERROR TRANSLATE BIAR JELAS
+                if(err.code === 'auth/weak-password') {
+                    alert("Gagal: Password terlalu gampang. Minimal harus 6 karakter bos!");
+                } else if(err.code === 'auth/email-already-in-use') {
+                    alert("Gagal: Email ini udah pernah didaftarin. Mending lu langsung klik 'Masuk' aja.");
+                } else if(err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') {
+                    alert("Gagal: Email atau password lu salah ketik nih.");
+                } else {
+                    alert("Gagal sistem: " + err.message);
+                }
+                btn.innerText = oriText; btn.disabled = false;
+            }
+        };
+
+        onAuthStateChanged(auth, (user) => { 
+            if (user) { 
+                document.getElementById('login-view').classList.add('hidden-view'); 
+                document.getElementById('seller-mail').innerText = user.email; 
+                mulaiPantau(user.email); 
+            } else { 
+                document.getElementById('login-view').classList.remove('hidden-view');
+                window.backToChoice(); 
+            } 
+        });
+
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
+        // --- DASHBOARD PANTAU DATA ---
         function mulaiPantau(email) {
             onSnapshot(query(collection(db, "transactions"), where("sellerId", "==", email)), (snap) => {
                 const cont = document.getElementById('live-orders-container'); cont.innerHTML = '';
                 snap.forEach(d => {
                     const t = d.data(); const id = d.id;
                     cont.innerHTML += `
-                        <div class="p-6 bg-white border border-slate-100 rounded-[2rem] flex flex-col gap-4 text-left">
+                        <div class="p-6 bg-white border border-slate-100 rounded-[2rem] flex flex-col gap-4 text-left shadow-sm hover:border-primary/50 transition">
                             <div class="flex justify-between items-center">
                                 <div class="flex items-center gap-4">
                                     <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-primary"><i data-lucide="package"></i></div>
@@ -107,20 +208,32 @@
                                 </div>
                                 <div class="text-right">
                                     <p class="text-orange-500 font-black text-lg leading-none">Rp ${Number(t.price).toLocaleString()}</p>
-                                    <span class="text-[8px] font-black uppercase ${t.status === 'berhasil' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'} px-2 py-0.5 rounded">${t.status}</span>
+                                    <span class="text-[8px] font-black uppercase ${t.status === 'selesai' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'} px-2 py-0.5 rounded">${t.status}</span>
                                 </div>
                             </div>
-                            <div class="flex gap-2 pt-4 border-t">
-                                <button onclick="window.lihatBukti('${t.bukti}')" class="flex-grow bg-slate-100 text-slate-600 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-tighter">Bukti TF</button>
-                                <button onclick="window.openChatSeller('${id}', '${t.customer}')" class="p-2.5 bg-blue-50 text-blue-600 rounded-xl"><i data-lucide="message-square"></i></button>
+                            
+                            ${t.status === 'selesai' && t.rating ? `
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 mt-2">
+                                <div class="flex gap-1 text-yellow-400 text-sm mb-1">
+                                    ${'★'.repeat(t.rating)}${'<span class="text-slate-200">★</span>'.repeat(5 - t.rating)}
+                                </div>
+                                <p class="text-xs font-medium text-slate-600 italic">"${t.ulasan || 'Buyer tidak meninggalkan ulasan tertulis.'}"</p>
+                            </div>` : ''}
+
+                            <div class="flex gap-2 pt-4 border-t border-slate-50">
+                                <button onclick="window.lihatBukti('${t.bukti}')" class="flex-grow bg-slate-100 text-slate-600 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-tighter hover:bg-slate-200 transition">Bukti TF</button>
+                                <button onclick="window.openChatSeller('${id}', '${t.customer}')" class="p-2.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition"><i data-lucide="message-square"></i></button>
                                 
+                                ${t.status !== 'selesai' ? `
                                 <select onchange="window.updateStatusChat('${id}', '${t.customer}', this.value)" class="bg-slate-900 text-white px-3 py-2.5 rounded-xl text-[10px] font-black uppercase outline-none cursor-pointer">
                                     <option value="" disabled selected>STATUS</option>
                                     <option value="OTW">DIANTAR</option>
                                     <option value="DITERIMA">DITERIMA</option>
-                                </select>
+                                </select>` : ''}
 
-                                ${t.status !== 'berhasil' ? `<button onclick="window.accPembayaran('${id}')" class="flex-grow bg-primary text-white py-2.5 rounded-xl text-[10px] font-black uppercase">ACC</button>` : `<button disabled class="flex-grow bg-green-500 text-white py-2.5 rounded-xl text-[10px] font-black opacity-50 italic">Selesai</button>`}
+                                ${t.status === 'pending' ? `<button onclick="window.accPembayaran('${id}')" class="flex-grow bg-primary text-white py-2.5 rounded-xl text-[10px] font-black uppercase shadow-md hover:bg-black transition">ACC</button>` : 
+                                  (t.status === 'selesai' ? `<button disabled class="flex-grow bg-green-500 text-white py-2.5 rounded-xl text-[10px] font-black opacity-50 italic cursor-not-allowed">SELESAI</button>` : 
+                                  `<button disabled class="flex-grow bg-blue-500 text-white py-2.5 rounded-xl text-[10px] font-black opacity-50 italic cursor-not-allowed">MENUNGGU</button>`)}
                             </div>
                         </div>`;
                 });
@@ -129,96 +242,169 @@
 
             onSnapshot(query(collection(db, "requests"), where("status", "==", "open")), (snap) => {
                 const cont = document.getElementById('live-requests-container'); cont.innerHTML = '';
+                if(window.timers) { for(let key in window.timers) clearInterval(window.timers[key]); }
+                window.timers = {};
+
                 snap.forEach(d => {
                     const r = d.data(); const reqId = d.id; const cardId = 'card-' + reqId;
-                    cont.innerHTML += `<div id="${cardId}" class="p-8 bg-white border-2 border-slate-50 rounded-[2.5rem] shadow-sm transition group text-left"><h4 class="text-xl font-black text-slate-800 mb-6 italic leading-tight text-left">"${r.query}"</h4><div id="btn-container-${reqId}"><button onclick="window.openOfferModal('${reqId}')" class="w-full bg-primary text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:bg-black transition">Kasih Harga</button></div></div>`;
+                    const reqTime = (r.createdAt && typeof r.createdAt.toDate === 'function') ? r.createdAt.toDate().getTime() : Date.now();
+                    const expireTime = reqTime + (60 * 60 * 1000); 
+
+                    cont.innerHTML += `
+                        <div id="${cardId}" class="p-8 bg-white border-2 border-slate-50 rounded-[2.5rem] shadow-sm transition group text-left flex flex-col justify-between">
+                            <div>
+                                <div class="flex justify-between items-center mb-4">
+                                    <div class="p-2 bg-blue-50 text-primary rounded-xl"><i data-lucide="megaphone" class="w-4 h-4"></i></div>
+                                    <span id="timer-${reqId}" class="text-[10px] font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-full tracking-widest font-mono">--:--</span>
+                                </div>
+                                <h4 class="text-xl font-black text-slate-800 mb-6 italic leading-tight text-left">"${r.query}"</h4>
+                            </div>
+                            <div id="btn-container-${reqId}">
+                                <button onclick="window.openOfferModal('${reqId}')" class="w-full bg-primary text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:bg-black transition">Kasih Harga</button>
+                            </div>
+                        </div>`;
+
+                    window.timers[reqId] = setInterval(() => {
+                        const now = Date.now(); const sisa = expireTime - now;
+                        const timerEl = document.getElementById('timer-' + reqId);
+                        const btnCont = document.getElementById('btn-container-' + reqId);
+                        const card = document.getElementById(cardId);
+
+                        if(!timerEl) { clearInterval(window.timers[reqId]); return; }
+
+                        if(sisa <= 0) {
+                            clearInterval(window.timers[reqId]);
+                            timerEl.innerText = "EXPIRED"; timerEl.classList.replace('text-blue-600', 'text-red-500'); timerEl.classList.replace('bg-blue-50', 'bg-red-50');
+                            if(btnCont && !btnCont.innerHTML.includes('Sudah Ditawar')) {
+                                card.classList.add('opacity-50', 'grayscale');
+                                btnCont.innerHTML = `<button disabled class="w-full bg-slate-200 text-slate-400 py-4 rounded-2xl text-[10px] font-black uppercase cursor-not-allowed">Waktu Habis</button>`;
+                            }
+                        } else {
+                            const m = Math.floor(sisa / 60000); const s = Math.floor((sisa % 60000) / 1000);
+                            timerEl.innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                        }
+                    }, 1000);
+
                     onSnapshot(query(collection(db, "offers"), where("requestId", "==", reqId), where("sellerId", "==", email)), (checkSnap) => {
                         const btnCont = document.getElementById('btn-container-' + reqId); const card = document.getElementById(cardId);
-                        if (!checkSnap.empty && btnCont && card) { card.classList.add('bg-slate-50', 'border-orange-200', 'opacity-80'); btnCont.innerHTML = `<button disabled class="w-full bg-orange-400 text-white py-4 rounded-2xl text-[10px] font-black uppercase cursor-not-allowed">Sudah Ditawar</button>`; }
+                        if (!checkSnap.empty && btnCont && card) { 
+                            card.classList.add('bg-orange-50', 'border-orange-200'); card.classList.remove('opacity-50', 'grayscale'); 
+                            btnCont.innerHTML = `<button disabled class="w-full bg-orange-400 text-white py-4 rounded-2xl text-[10px] font-black uppercase cursor-not-allowed shadow-md">Sudah Ditawar</button>`; 
+                            clearInterval(window.timers[reqId]);
+                            const timerEl = document.getElementById('timer-' + reqId);
+                            if(timerEl) { timerEl.innerText = "SELESAI"; timerEl.className = "text-[10px] font-black text-orange-600 bg-orange-100 px-3 py-1 rounded-full tracking-widest"; }
+                        }
                     });
                 });
                 if (typeof lucide !== 'undefined') lucide.createIcons();
             });
         }
 
-        // --- FUNGSI UPDATE STATUS KE CHAT ---
         window.updateStatusChat = async (orderId, customerName, status) => {
             try {
-                // Tarik data penawaran terakhir buat ambil foto barang
                 const transSnap = await getDoc(doc(db, "transactions", orderId));
                 if (!transSnap.exists()) return alert("Gagal narik data transaksi!");
                 
                 const dataTrans = transSnap.data();
-                const fotoBarang = dataTrans.media_url || ""; // Foto produk awal
-                
-                let pesan = "";
-                if (status === "OTW") pesan = `Halo ${customerName}, barang lu lagi diantar kurir ya!`;
-                else if (status === "DITERIMA") pesan = `Barang lu katanya udah sampai di lokasi nih. Cek ya!`;
+                const fotoBarang = dataTrans.media_url || ""; 
+                let pesan = ""; let newStatus = dataTrans.status;
 
-                await addDoc(collection(db, "chats"), {
-                    orderId: orderId,
-                    sender: 'seller',
-                    message: pesan,
-                    img: fotoBarang, // Kirim foto barang bareng status
-                    time: serverTimestamp()
-                });
-                alert("Status & Foto berhasil dikirim ke buyer!");
+                if (status === "OTW") { pesan = `Halo ${customerName}, barang lu lagi diantar kurir ya! Cek live tracking di atas.`; newStatus = "dikirim"; }
+                else if (status === "DITERIMA") { pesan = `Barang lu katanya udah sampai di lokasi nih. Cek ya! Kalo oke, jangan lupa klik Selesai.`; newStatus = "sampai"; }
+
+                await updateDoc(doc(db, "transactions", orderId), { status: newStatus });
+                await addDoc(collection(db, "chats"), { orderId: orderId, sender: 'seller', message: pesan, img: fotoBarang, time: serverTimestamp() });
+                alert("Tracking di-update & pesan berhasil dikirim ke buyer!");
             } catch (e) { alert("Gagal update status!"); }
         };
 
         window.lihatBukti = (b) => { const img = new Image(); img.src = b; const w = window.open(""); w.document.write(img.outerHTML); };
-        window.accPembayaran = async (id) => { if(confirm("ACC?")) { await updateDoc(doc(db, "transactions", id), { status: "berhasil" }); } };
+        window.accPembayaran = async (id) => { if(confirm("ACC Pembayaran?")) { await updateDoc(doc(db, "transactions", id), { status: "diproses" }); } };
         window.openOfferModal = (id) => { document.getElementById('target-request-id').value = id; document.getElementById('offer-modal').classList.remove('hidden-view'); };
         window.closeOfferModal = () => document.getElementById('offer-modal').classList.add('hidden-view');
 
         document.getElementById('form-tawaran').onsubmit = async (e) => {
-            e.preventDefault(); const btn = document.getElementById('btn-kirim-tawaran'); btn.innerText = "...";
-            const toB64 = (f) => new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); });
+            e.preventDefault(); 
+            const btn = document.getElementById('btn-kirim-tawaran'); 
+            btn.innerText = "MENGIRIM..."; btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const compressImage = (file) => new Promise((resolve) => {
+                const reader = new FileReader(); reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image(); img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas'); const MAX_WIDTH = 600; const scaleSize = MAX_WIDTH / img.width;
+                        canvas.width = img.width > MAX_WIDTH ? MAX_WIDTH : img.width; canvas.height = img.width > MAX_WIDTH ? img.height * scaleSize : img.height;
+                        const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.7));
+                    };
+                };
+            });
+
             try {
-                const img = await toB64(document.getElementById('o-media').files[0]); const qr = await toB64(document.getElementById('o-qr').files[0]);
-                await addDoc(collection(db, "offers"), { requestId: document.getElementById('target-request-id').value, sellerId: auth.currentUser.email, storeName: document.getElementById('o-store').value, productName: document.getElementById('o-name').value, price: Number(document.getElementById('o-price').value), berat: document.getElementById('o-berat').value || "-", volume: document.getElementById('o-volume').value || "-", media_url: img, qr_url: qr, bank: document.getElementById('o-bank').value, rekening: document.getElementById('o-rek').value, createdAt: serverTimestamp() });
-                window.closeOfferModal(); btn.innerText = "KIRIM PENAWARAN";
-            } catch (err) { alert("Gagal!"); }
+                const mediaFile = document.getElementById('o-media').files[0]; const qrFile = document.getElementById('o-qr').files[0];
+                const imgStr = await compressImage(mediaFile); const qrStr = await compressImage(qrFile);
+
+                await addDoc(collection(db, "offers"), { requestId: document.getElementById('target-request-id').value, sellerId: auth.currentUser.email, storeName: document.getElementById('o-store').value, productName: document.getElementById('o-name').value, price: Number(document.getElementById('o-price').value), berat: document.getElementById('o-berat').value || "-", volume: document.getElementById('o-volume').value || "-", media_url: imgStr, qr_url: qrStr, bank: document.getElementById('o-bank').value, rekening: document.getElementById('o-rek').value, createdAt: serverTimestamp() });
+
+                window.closeOfferModal(); document.getElementById('form-tawaran').reset();
+            } catch (err) { alert("Gagal ngirim! Error: " + err.message); } finally {
+                btn.innerText = "KIRIM PENAWARAN"; btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
         };
 
-       // Ganti fungsi openChatSeller di seller.html lu pake yang ini
-window.openChatSeller = (orderId, customerName) => {
-    currentChatId = orderId;
-    document.getElementById('chat-seller-title').innerText = "chat: " + customerName;
-    document.getElementById('chat-modal-seller').classList.remove('hidden-view');
-    
-    // Cek status transaksi buat ngunci chat
-    onSnapshot(doc(db, "transactions", orderId), (docSnap) => {
-        const isSelesai = docSnap.data()?.status === 'selesai';
-        const chatForm = document.querySelector('#chat-modal-seller form');
-        if (isSelesai) {
-            chatForm.innerHTML = `<div class="w-full text-center p-2 text-[10px] font-black uppercase text-slate-400 bg-slate-100 italic">Transaksi Selesai</div>`;
-        }
-    });
+        window.openChatSeller = (orderId, customerName) => {
+            currentChatId = orderId; document.getElementById('chat-seller-title').innerText = "chat: " + customerName; document.getElementById('chat-modal-seller').classList.remove('hidden-view');
+            
+            onSnapshot(doc(db, "transactions", orderId), (docSnap) => {
+                const dataTrans = docSnap.data(); if(!dataTrans) return;
+                const isSelesai = dataTrans.status === 'selesai'; const st = dataTrans.status;
 
-    onSnapshot(query(collection(db, "chats"), where("orderId", "==", orderId)), (snap) => {
-        const box = document.getElementById('chat-box-seller'); 
-        box.innerHTML = '';
-        const msgs = []; snap.forEach(d => msgs.push(d.data()));
-        msgs.sort((a,b) => (a.time?.seconds || 0) - (b.time?.seconds || 0));
-        msgs.forEach(m => {
-            const isMe = m.sender === 'seller';
-            const align = isMe ? 'items-end' : 'items-start';
-            const bg = isMe ? 'bg-primary text-white rounded-l-xl rounded-tr-xl' : 'bg-white border rounded-r-xl rounded-tl-xl';
-            const foto = m.img ? `<img src="${m.img}" class="w-full rounded-lg mb-1 cursor-pointer" onclick="window.open('${m.img}')">` : '';
-            box.innerHTML += `<div class="flex flex-col ${align} mb-1"><div class="${bg} p-2 max-w-[80%] shadow-sm">${foto}${m.message || ''}</div></div>`;
-        });
-        box.scrollTop = box.scrollHeight;
-    });
-};
+                const trackingHTML = `
+                    <div class="px-5 py-3 bg-white border-b flex justify-between items-center text-[8px] font-black uppercase tracking-widest text-slate-300 shadow-sm z-10">
+                        <div class="${['pending','diproses','dikirim','sampai','selesai'].includes(st) ? 'text-primary' : ''} flex flex-col items-center gap-1 transition-colors"><i data-lucide="clock" class="w-4 h-4"></i>Pending</div>
+                        <div class="h-0.5 flex-grow ${['diproses','dikirim','sampai','selesai'].includes(st) ? 'bg-primary' : 'bg-slate-100'} mx-2 transition-colors"></div>
+                        <div class="${['diproses','dikirim','sampai','selesai'].includes(st) ? 'text-primary' : ''} flex flex-col items-center gap-1 transition-colors"><i data-lucide="package" class="w-4 h-4"></i>Diproses</div>
+                        <div class="h-0.5 flex-grow ${['dikirim','sampai','selesai'].includes(st) ? 'bg-primary' : 'bg-slate-100'} mx-2 transition-colors"></div>
+                        <div class="${['dikirim','sampai','selesai'].includes(st) ? 'text-primary' : ''} flex flex-col items-center gap-1 transition-colors"><i data-lucide="truck" class="w-4 h-4"></i>Dikirim</div>
+                        <div class="h-0.5 flex-grow ${st === 'selesai' ? 'bg-green-500' : 'bg-slate-100'} mx-2 transition-colors"></div>
+                        <div class="${st === 'selesai' ? 'text-green-500' : ''} flex flex-col items-center gap-1 transition-colors"><i data-lucide="check-circle" class="w-4 h-4"></i>Selesai</div>
+                    </div>
+                `;
+                
+                const oldTracking = document.getElementById('tracking-bar-seller'); if(oldTracking) oldTracking.remove();
+                const trackingDiv = document.createElement('div'); trackingDiv.id = 'tracking-bar-seller'; trackingDiv.innerHTML = trackingHTML;
+                document.getElementById('chat-seller-title').parentElement.after(trackingDiv);
+
+                const chatForm = document.querySelector('#chat-modal-seller form');
+                if (isSelesai) { 
+                    chatForm.innerHTML = `<div class="w-full text-center p-3 text-[10px] font-black uppercase text-slate-400 bg-slate-100 italic">Transaksi Selesai</div>`; 
+                } else {
+                    chatForm.innerHTML = `<label class="cursor-pointer text-slate-400 hover:text-primary"><i data-lucide="image" class="w-5 h-5"></i><input type="file" id="chat-img-seller" accept="image/*" class="hidden"></label><input type="text" id="chat-input-seller" placeholder="balas..." class="flex-grow bg-slate-100 rounded-xl px-4 py-2 text-xs outline-none"><button type="submit" class="bg-primary text-white p-2 rounded-xl"><i data-lucide="send" class="w-4 h-4"></i></button>`;
+                }
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            });
+
+            onSnapshot(query(collection(db, "chats"), where("orderId", "==", orderId)), (snap) => {
+                const box = document.getElementById('chat-box-seller'); box.innerHTML = ''; const msgs = []; snap.forEach(d => msgs.push(d.data()));
+                msgs.sort((a,b) => (a.time?.seconds || 0) - (b.time?.seconds || 0));
+                msgs.forEach(m => {
+                    const isMe = m.sender === 'seller'; const align = isMe ? 'items-end' : 'items-start'; const bg = isMe ? 'bg-primary text-white rounded-l-xl rounded-tr-xl' : 'bg-white border rounded-r-xl rounded-tl-xl';
+                    const foto = m.img ? `<img src="${m.img}" class="w-full rounded-lg mb-1 cursor-pointer shadow-sm" onclick="window.open('${m.img}')">` : '';
+                    box.innerHTML += `<div class="flex flex-col ${align} mb-1 text-left"><div class="${bg} p-2 max-w-[80%] shadow-sm">${foto}${m.message || ""}</div></div>`;
+                });
+                box.scrollTop = box.scrollHeight;
+            });
+        };
 
         window.sendChatSeller = async () => {
             const input = document.getElementById('chat-input-seller'), fileInput = document.getElementById('chat-img-seller');
-            if(!input.value && !fileInput.files[0]) return;
-            let img = null; if(fileInput.files[0]) { const toB64 = (f) => new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); }); img = await toB64(fileInput.files[0]); }
-            await addDoc(collection(db, "chats"), { orderId: currentChatId, sender: 'seller', message: input.value, img: img, time: serverTimestamp() });
-            input.value = ''; fileInput.value = '';
+            if(!input?.value && !fileInput?.files[0]) return;
+            let img = null; if(fileInput?.files[0]) { const toB64 = (f) => new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); }); img = await toB64(fileInput.files[0]); }
+            await addDoc(collection(db, "chats"), { orderId: currentChatId, sender: 'seller', message: input?.value || "", img: img, time: serverTimestamp() });
+            if(input) input.value = ''; if(fileInput) fileInput.value = '';
         };
+
         window.closeChatSeller = () => document.getElementById('chat-modal-seller').classList.add('hidden-view');
         window.onload = () => { if (typeof lucide !== 'undefined') lucide.createIcons(); };
     </script>
